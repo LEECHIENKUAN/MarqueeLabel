@@ -245,9 +245,16 @@ typedef void (^animationCompletionBlock)(void);
         if (CGSizeEqualToSize(maxSize, CGSizeZero)) {
             maxSize = CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX);
         }
-        CGSize minimumLabelSize = [self.subLabel.text sizeWithFont:self.subLabel.font
-                                                   constrainedToSize:maxSize
-                                                       lineBreakMode:NSLineBreakByClipping];
+        
+        NSMutableParagraphStyle *textStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
+        textStyle.lineBreakMode = NSLineBreakByClipping;
+        
+        CGSize minimumLabelSize = [self.subLabel.text
+                                    boundingRectWithSize:maxSize
+                                    options:NSStringDrawingUsesLineFragmentOrigin
+                                    attributes:@{ NSFontAttributeName : self.subLabel.font, NSParagraphStyleAttributeName : textStyle }
+                                    context:nil].size;
+        
         // Adjust for fade length
         CGSize minimumSize = CGSizeMake(minimumLabelSize.width + (self.fadeLength * 2), minimumLabelSize.height);
         
@@ -471,10 +478,16 @@ typedef void (^animationCompletionBlock)(void);
                                                                        options:0
                                                                        context:nil].size;
     } else {
+        
+        NSMutableParagraphStyle *textStyle = [[NSMutableParagraphStyle defaultParagraphStyle] mutableCopy];
+        textStyle.lineBreakMode = NSLineBreakByClipping;
+
         // Calculate on base string
-        expectedLabelSize = [self.subLabel.text sizeWithFont:self.font
-                                           constrainedToSize:maximumLabelSize
-                                               lineBreakMode:NSLineBreakByClipping];
+        expectedLabelSize = [self.subLabel.text
+                                   boundingRectWithSize:maximumLabelSize
+                                   options:NSStringDrawingUsesLineFragmentOrigin
+                                   attributes:@{ NSFontAttributeName : self.font, NSParagraphStyleAttributeName : textStyle }
+                                   context:nil].size;
     }
     
     expectedLabelSize.width = ceilf(expectedLabelSize.width);
